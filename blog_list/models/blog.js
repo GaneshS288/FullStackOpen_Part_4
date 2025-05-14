@@ -3,10 +3,27 @@ import { MONGODB_URL } from "../util/config.js";
 import { error as errorLogger } from "../util/logger.js";
 
 const blogSchema = new mongoose.Schema({
-    title: String,
-    author: String,
-    url: String,
-    likes: Number,
+    title: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    author: {
+        type: String,
+        required: true,
+        minLength: [3, "author name must be at least 3 letters long"],
+        trim: true,
+    },
+    url: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    likes: {
+        type: Number,
+        min: [0, "likes can't be less than 0"],
+        required: true,
+    },
 });
 
 blogSchema.set("toJSON", {
