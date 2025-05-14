@@ -12,4 +12,14 @@ function totalLikes(blogs) {
     return total;
 }
 
-export { dummy, totalLikes };
+function favoriteBlog(blogs) {
+    if(blogs.length === 0) 
+        return null;
+
+    //descending sort
+    const sortedBlogs = blogs.toSorted((a, b) => b.likes - a.likes);
+
+    return sortedBlogs[0];
+}
+
+export { dummy, totalLikes, favoriteBlog };
