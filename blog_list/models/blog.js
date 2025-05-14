@@ -37,7 +37,7 @@ blogSchema.set("toJSON", {
 const Blog = mongoose.model("Blog", blogSchema);
 
 try {
-    mongoose.connect(MONGODB_URL);
+    await mongoose.connect(MONGODB_URL);
     console.log("succesfully connected to mongodb");
 } catch (error) {
     errorLogger(error);
