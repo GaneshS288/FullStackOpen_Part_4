@@ -1,10 +1,8 @@
-import "dotenv/config";
-import mongoose from "mongoose";
+import express from "express";
 
-try {
-    await mongoose.connect(process.env.MONGODB_URL);
-    console.log("succesfully connected")
-} catch (error) {
-    console.log(error);
-}
+const app = express();
+
+app.use(express.json());
+
+export default app;
 
