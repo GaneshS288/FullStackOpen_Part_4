@@ -1,5 +1,5 @@
 import { describe, test } from "node:test";
-import { strictEqual, deepStrictEqual, ok} from "node:assert";
+import { strictEqual, deepStrictEqual, ok } from "node:assert";
 import { favoriteBlog } from "../util/list_helper.js";
 
 describe("Favorite Blog", () => {
@@ -139,6 +139,15 @@ describe("Favorite Blog", () => {
 
         const result = favoriteBlog(blogs);
 
-        ok(result.author === blogs[2].author || result.author === blogs[5].author);
-    })
+        const containsCorrectBlog = [blogs[2], blogs[5]].some((blog) => {
+            try {
+                deepStrictEqual(result, blog);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        });
+
+        ok(containsCorrectBlog);
+    });
 });
