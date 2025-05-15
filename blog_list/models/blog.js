@@ -23,6 +23,7 @@ const blogSchema = new mongoose.Schema({
         type: Number,
         min: [0, "likes can't be less than 0"],
         required: true,
+        default: 0,
     },
 });
 
