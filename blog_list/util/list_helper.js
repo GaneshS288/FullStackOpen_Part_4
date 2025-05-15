@@ -22,8 +22,7 @@ function favoriteBlog(blogs) {
 }
 
 function mostBlogs(blogs) {
-    if(blogs.length === 0)
-        return null;
+    if (blogs.length === 0) return null;
 
     const authorsWithBlogCount = blogs.reduce((accu, curr) => {
         const authorAlreadyInAccu = accu.find((author) => {
@@ -45,4 +44,27 @@ function mostBlogs(blogs) {
     return sortedAuthors[0];
 }
 
-export { dummy, totalLikes, favoriteBlog, mostBlogs };
+function mostLikes(blogs) {
+    if (blogs.length === 0) return null;
+
+    const authorsWithLikeCount = blogs.reduce((accu, curr) => {
+        const authorAlreadyInAccu = accu.find((author) => {
+            return author.author === curr.author;
+        });
+
+        if (authorAlreadyInAccu) authorAlreadyInAccu.likes += curr.likes;
+        else if (!authorAlreadyInAccu)
+            accu.push({ author: curr.author, likes: curr.likes });
+
+        return accu;
+    }, []);
+
+    //sort authors in descending order
+    const sortedAuthors = authorsWithLikeCount.sort(
+        (a, b) => b.likes - a.likes
+    );
+
+    return sortedAuthors[0];
+}
+
+export { dummy, totalLikes, favoriteBlog, mostBlogs, mostLikes };

@@ -1,17 +1,18 @@
 import { describe, test } from "node:test";
 import { strictEqual, deepStrictEqual, ok } from "node:assert";
-import { mostBlogs } from "../util/list_helper.js";
+import { mostLikes } from "../util/list_helper.js";
+
 
 describe("Most blogs", () => {
     test("returns null if list is empty", () => {
         const blogs = [];
 
-        const result = mostBlogs(blogs);
+        const result = mostLikes(blogs);
 
         strictEqual(result, null);
     });
 
-    test("if list only has one blog return that blog", () => {
+    test("if list only has one blog return that blog author", () => {
         const blogs = [
             {
                 _id: "5a422a851b54a676234d17f7",
@@ -23,12 +24,12 @@ describe("Most blogs", () => {
             },
         ];
 
-        const result = mostBlogs(blogs);
+        const result = mostLikes(blogs);
 
-        deepStrictEqual(result, { author: "Michael Chan", blogs: 1 });
+        deepStrictEqual(result, { author: "Michael Chan", likes: 7 });
     });
 
-    test("returns the author with most blogs", () => {
+    test("returns the author with most likes", () => {
         const blogs = [
             {
                 _id: "5a422a851b54a676234d17f7",
@@ -80,12 +81,12 @@ describe("Most blogs", () => {
             },
         ];
 
-        const result = mostBlogs(blogs);
+        const result = mostLikes(blogs);
 
-        deepStrictEqual(result, { author: "Robert C. Martin", blogs: 3 });
+        deepStrictEqual(result, { author: "Edsger W. Dijkstra", likes: 17 });
     });
 
-    test("if multiple authors are tied for the blog count, retruns any one of them", () => {
+    test("if multiple authors are tied for the like count, retruns any one of them", () => {
         const blogs = [
             {
                 _id: "5a422a851b54a676234d17f7",
@@ -124,16 +125,16 @@ describe("Most blogs", () => {
                 title: "TDD harms architecture",
                 author: "Robert C. Martin",
                 url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-                likes: 0,
+                likes: 7,
                 __v: 0,
             },
         ];
 
-        const result = mostBlogs(blogs);
+        const result = mostLikes(blogs);
 
         const matchesCorrectAuthor = [
-            { author: "Robert C. Martin", blogs: 2 },
-            { author: "Edsger W. Dijkstra", blogs: 2 },
+            { author: "Robert C. Martin", likes: 17 },
+            { author: "Edsger W. Dijkstra", likes: 17 },
         ].some((author) => {
             try {
                 deepStrictEqual(result, author);
