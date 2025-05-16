@@ -53,6 +53,25 @@ describe("Blog api", () => {
 
             deepStrictEqual(uploadedBlog, dummyBlog);
     })
+
+    test("if like property is missing in post request it defaults to 0", async () => {
+        const dummyBlog = {
+            title : "This is a test blog",
+            author : "Ganesh",
+            url: "http://notARealURL.com"
+        }
+
+        await api.post("/api/blogs").send(dummyBlog).expect(201).expect("Content-Type", /application\/json/);
+
+        const { body } = await api
+            .get("/api/blogs")
+            .expect(200)
+            .expect("Content-Type", /application\/json/);
+
+            const uploadedBlog = body.find((blog) => blog.title === dummyBlog.title);
+
+            strictEqual(uploadedBlog.likes, 0);
+    })
 });
 
 after(async () => {
