@@ -39,56 +39,105 @@ describe("Adding a blog", () => {
         await Blog.deleteMany({});
         await Blog.insertMany(testBlogsData);
     });
-    
+
     test("successfully adds blog", async () => {
         const dummyBlog = {
-            title : "This is a test blog",
-            author : "Ganesh",
+            title: "This is a test blog",
+            author: "Ganesh",
             url: "http://notARealURL.com",
-            likes : 12,
-        }
+            likes: 12,
+        };
 
-        await api.post("/api/blogs").send(dummyBlog).expect(201).expect("Content-Type", /application\/json/);
+        await api
+            .post("/api/blogs")
+            .send(dummyBlog)
+            .expect(201)
+            .expect("Content-Type", /application\/json/);
 
         const { body } = await api
             .get("/api/blogs")
             .expect(200)
             .expect("Content-Type", /application\/json/);
 
-            const uploadedBlog = body.find((blog) => blog.title === dummyBlog.title);
-            delete uploadedBlog.id;
+        const uploadedBlog = body.find(
+            (blog) => blog.title === dummyBlog.title
+        );
+        delete uploadedBlog.id;
 
-            deepStrictEqual(uploadedBlog, dummyBlog);
-    })
+        deepStrictEqual(uploadedBlog, dummyBlog);
+    });
 
     test("if like property is missing in post request it defaults to 0", async () => {
         const dummyBlog = {
-            title : "This is a test blog",
-            author : "Ganesh",
-            url: "http://notARealURL.com"
-        }
+            title: "This is a test blog",
+            author: "Ganesh",
+            url: "http://notARealURL.com",
+        };
 
-        await api.post("/api/blogs").send(dummyBlog).expect(201).expect("Content-Type", /application\/json/);
+        await api
+            .post("/api/blogs")
+            .send(dummyBlog)
+            .expect(201)
+            .expect("Content-Type", /application\/json/);
 
         const { body } = await api
             .get("/api/blogs")
             .expect(200)
             .expect("Content-Type", /application\/json/);
 
-            const uploadedBlog = body.find((blog) => blog.title === dummyBlog.title);
+        const uploadedBlog = body.find(
+            (blog) => blog.title === dummyBlog.title
+        );
 
-            strictEqual(uploadedBlog.likes, 0);
-    })
+        strictEqual(uploadedBlog.likes, 0);
+    });
 
     test("if url or title property is missing from the post request 400 status is returned", async () => {
         const dummyBlog = {
-            title : "This is a test blog",
-            author : "Ganesh",
-        }
+            title: "This is a test blog",
+            author: "Ganesh",
+        };
 
-        await api.post("/api/blogs").send(dummyBlog).expect(400).expect("Content-Type", /application\/json/);
+        await api
+            .post("/api/blogs")
+            .send(dummyBlog)
+            .expect(400)
+            .expect("Content-Type", /application\/json/);
+    });
+});
+
+describe("Deleting a blog", () => {
+    beforeEach(async () => {
+        await Blog.deleteMany({});
+        await Blog.insertMany(testBlogsData);
+    });
+
+    test("returns 204 status on successfull deletion and deletes blog", async () => {
+        const responseBeforeDelete = await api
+            .get("/api/blogs")
+            .expect(200)
+            .expect("Content-Type", /application\/json/);
+
+        const blogId = responseBeforeDelete.body[0].id;
+
+        await api.delete(`/api/blogs/${blogId}`).expect(204);
+
+        const responseAfterDelete = await api
+            .get("/api/blogs")
+            .expect(200)
+            .expect("Content-Type", /application\/json/);
+
+        strictEqual(
+            responseAfterDelete.body.length,
+            responseBeforeDelete.body.length - 1
+        );
+    });
+
+    test("returns 404 status when the blog with id doesn't exist", async () => {
+        const blogId = "68244dc6c0d680d3c9815448";
+        await api.delete(`/api/blogs/${blogId}`).expect(404);
     })
-})
+});
 
 after(async () => {
     await mongoose.connection.close();
