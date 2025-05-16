@@ -45,3 +45,4 @@ try {
 }
 
 export default Blog;
+export { mongoose };
