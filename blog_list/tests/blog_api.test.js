@@ -136,7 +136,67 @@ describe("Deleting a blog", () => {
     test("returns 404 status when the blog with id doesn't exist", async () => {
         const blogId = "68244dc6c0d680d3c9815448";
         await api.delete(`/api/blogs/${blogId}`).expect(404);
-    })
+    });
+});
+
+describe("Updating a blog", () => {
+    beforeEach(async () => {
+        await Blog.deleteMany({});
+        await Blog.insertMany(testBlogsData);
+    });
+
+    test("sucessfully updates a blog", async () => {
+        const responseBeforeUpdate = await api
+            .get("/api/blogs")
+            .expect(200)
+            .expect("Content-Type", /application\/json/);
+
+        const blogId = responseBeforeUpdate.body[0].id;
+
+        const updateData = {
+            title: "how to test software",
+            author: "ganesh",
+            url: "https://someRandomUrl.com",
+            likes: 20,
+        };
+
+        const { body: updatedBlog } = await api
+            .put(`/api/blogs/${blogId}`)
+            .send(updateData)
+            .expect(200);
+        delete updatedBlog.id;
+
+        deepStrictEqual(updatedBlog, updateData);
+    });
+
+    test("retruns 404 if blog with id doesn't exist", async () => {
+        const blogId = "68244dc6c0d680d3c9815448";
+
+        const updateData = {
+            title: "how to test software",
+            author: "ganesh",
+            url: "https://someRandomUrl.com",
+            likes: 20,
+        };
+
+        await api.put(`/api/blogs/${blogId}`).send(updateData).expect(404);
+    });
+
+    test("returns 400 if a field is missing in request body", async () => {
+        const responseBeforeUpdate = await api
+            .get("/api/blogs")
+            .expect(200)
+            .expect("Content-Type", /application\/json/);
+
+        const blogId = responseBeforeUpdate.body[0].id;
+
+        const updateData = {
+            title: "how to test software",
+            author: "ganesh",
+        };
+
+        await api.put(`/api/blogs/${blogId}`).send(updateData).expect(400);
+    });
 });
 
 after(async () => {
