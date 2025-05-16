@@ -143,7 +143,7 @@ describe("Favorite Blog", () => {
             try {
                 deepStrictEqual(result, blog);
                 return true;
-            } catch (error) {
+            } catch {
                 return false;
             }
         });

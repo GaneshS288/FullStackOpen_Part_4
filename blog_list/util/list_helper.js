@@ -1,4 +1,4 @@
-function dummy(blogs) {
+function dummy() {
     return 1;
 }
 

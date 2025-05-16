@@ -139,7 +139,7 @@ describe("Most blogs", () => {
             try {
                 deepStrictEqual(result, author);
                 return true;
-            } catch (error) {
+            } catch {
                 return false;
             }
         });
