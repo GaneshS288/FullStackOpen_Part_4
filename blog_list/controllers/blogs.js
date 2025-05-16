@@ -11,7 +11,7 @@ async function postNewBlog(req, res) {
     const newBlog = new Blog(req.body);
     const saveResult = await newBlog.save();
 
-    res.json(saveResult.toJSON());
+    res.status(201).json(saveResult.toJSON());
 }
 
 export { getAllBlogs, postNewBlog };

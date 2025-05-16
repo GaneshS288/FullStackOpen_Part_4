@@ -1,5 +1,5 @@
 import { describe, beforeEach, test, after } from "node:test";
-import { strictEqual } from "node:assert";
+import { strictEqual, deepStrictEqual } from "node:assert";
 import supertest from "supertest";
 import app from "../app.js";
 import Blog, { mongoose } from "../models/blog.js";
@@ -22,7 +22,7 @@ describe("Blog api", () => {
         strictEqual(res.body.length, 6);
     });
 
-    test("returned blogs have id parameter", async () => {
+    test("returned blogs have id property", async () => {
         const { body } = await api
             .get("/api/blogs")
             .expect(200)
@@ -32,6 +32,27 @@ describe("Blog api", () => {
 
         strictEqual(hasIdInEveryBlog, true);
     });
+
+    test("post requests can add blogs", async () => {
+        const dummyBlog = {
+            title : "This is a test blog",
+            author : "Ganesh",
+            url: "http://notARealURL.com",
+            likes : 12,
+        }
+
+        await api.post("/api/blogs").send(dummyBlog).expect(201).expect("Content-Type", /application\/json/);
+
+        const { body } = await api
+            .get("/api/blogs")
+            .expect(200)
+            .expect("Content-Type", /application\/json/);
+
+            const uploadedBlog = body.find((blog) => blog.title === dummyBlog.title);
+            delete uploadedBlog.id;
+
+            deepStrictEqual(uploadedBlog, dummyBlog);
+    })
 });
 
 after(async () => {
