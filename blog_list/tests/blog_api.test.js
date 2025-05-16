@@ -72,6 +72,15 @@ describe("Blog api", () => {
 
             strictEqual(uploadedBlog.likes, 0);
     })
+
+    test("if url or title property is missing from the post request 400 status is returned", async () => {
+        const dummyBlog = {
+            title : "This is a test blog",
+            author : "Ganesh",
+        }
+
+        await api.post("/api/blogs").send(dummyBlog).expect(400).expect("Content-Type", /application\/json/);
+    })
 });
 
 after(async () => {
