@@ -7,13 +7,13 @@ import { testBlogsData } from "./testHelper.js";
 
 const api = supertest(app);
 
-describe("Blog api", () => {
+describe("Viewing blogs", () => {
     beforeEach(async () => {
         await Blog.deleteMany({});
         await Blog.insertMany(testBlogsData);
     });
 
-    test("get request returns correct number of blogs", async () => {
+    test("retruns the correct number of blogs", async () => {
         const res = await api
             .get("/api/blogs")
             .expect(200)
@@ -32,8 +32,15 @@ describe("Blog api", () => {
 
         strictEqual(hasIdInEveryBlog, true);
     });
+});
 
-    test("post requests can add blogs", async () => {
+describe("Adding a blog", () => {
+    beforeEach(async () => {
+        await Blog.deleteMany({});
+        await Blog.insertMany(testBlogsData);
+    });
+    
+    test("successfully adds blog", async () => {
         const dummyBlog = {
             title : "This is a test blog",
             author : "Ganesh",
@@ -81,7 +88,7 @@ describe("Blog api", () => {
 
         await api.post("/api/blogs").send(dummyBlog).expect(400).expect("Content-Type", /application\/json/);
     })
-});
+})
 
 after(async () => {
     await mongoose.connection.close();
