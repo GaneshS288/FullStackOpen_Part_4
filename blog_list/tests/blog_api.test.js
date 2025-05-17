@@ -3,6 +3,7 @@ import { strictEqual, deepStrictEqual } from "node:assert";
 import supertest from "supertest";
 import app from "../app.js";
 import Blog, { mongoose } from "../models/blog.js";
+import User from "../models/user.js";
 import { testBlogsData } from "./testHelper.js";
 
 const api = supertest(app);
@@ -196,6 +197,49 @@ describe("Updating a blog", () => {
         };
 
         await api.put(`/api/blogs/${blogId}`).send(updateData).expect(400);
+    });
+});
+
+describe("Creating users", () => {
+    beforeEach(async () => {
+        await User.deleteMany({});
+    });
+
+    test("succesfully creates user", async () => {
+        const user = {
+            username: "ganesh",
+            name: "Ganesh",
+            password: "puny",
+        };
+
+        const res = await api
+            .post("/api/users")
+            .send(user)
+            .expect(201)
+            .expect("Content-Type", /application\/json/);
+
+        const createdUser = await User.findById(res.body.id);
+
+        strictEqual(createdUser.username, "ganesh");
+    });
+
+    test("Fails with 400 when password is less than 3 characters", async () => {
+        const user = {
+            username: "ganesh",
+            name: "Ganesh",
+            password: "pu",
+        };
+
+        const res = await api
+            .post("/api/users")
+            .send(user)
+            .expect(400)
+            .expect("Content-Type", /application\/json/);
+
+        strictEqual(
+            res.body.error,
+            "password must be at least 3 characters long"
+        );
     });
 });
 
