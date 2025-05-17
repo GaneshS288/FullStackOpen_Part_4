@@ -241,6 +241,28 @@ describe("Creating users", () => {
             "password must be at least 3 characters long"
         );
     });
+
+    test("fails if the username is not unique", async () => {
+        const user = {
+            username: "ganesh",
+            name: "Ganesh",
+            password: "puny",
+        };
+
+        await api
+            .post("/api/users")
+            .send(user)
+            .expect(201)
+            .expect("Content-Type", /application\/json/);
+
+        const res = await api
+            .post("/api/users")
+            .send(user)
+            .expect(400)
+            .expect("Content-Type", /application\/json/);
+
+            strictEqual(res.body.error, "expected `username` to be unique")
+    })
 });
 
 after(async () => {
