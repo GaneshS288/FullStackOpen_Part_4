@@ -23,7 +23,7 @@ async function postUser(req, res) {
 }
 
 async function getAllUsers(req, res) {
-    let allUsers = await User.find({});
+    let allUsers = await User.find({}).populate("blogs", {title: 1, author: 1, id: 1, likes: 1, url: 1});
     allUsers = allUsers.map((user) => user.toJSON());
 
     res.json(allUsers);

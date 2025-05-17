@@ -1,15 +1,19 @@
 import Blog from "../models/blog.js";
+import User from "../models/user.js";
 
 async function getAllBlogs(req, res) {
-    let allBlogs = await Blog.find({});
+    let allBlogs = await Blog.find({}).populate("user", {username: 1, name: 1, id: 1});
     allBlogs = allBlogs.map((blog) => blog.toJSON());
 
     res.json(allBlogs);
 }
 
 async function postNewBlog(req, res) {
-    const newBlog = new Blog(req.body);
+    const user = await User.find({});
+    const newBlog = new Blog({...req.body, user: user[0]._id});
     const saveResult = await newBlog.save();
+    user[0].blogs = user[0].blogs.concat(saveResult._id)
+    await user[0].save();
 
     res.status(201).json(saveResult.toJSON());
 }
