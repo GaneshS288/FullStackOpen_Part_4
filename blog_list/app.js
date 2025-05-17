@@ -3,6 +3,7 @@ import blogRouter from "./routes/blogRouter.js";
 import { errorHandler } from "./util/middleware.js";
 import { request as requestLogger } from "./util/logger.js";
 import userRouter from "./routes/userRouter.js";
+import loginRouter from "./routes/loginRouter.js";
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(requestLogger);
 
 app.use("/api/blogs", blogRouter);
 app.use("/api/users", userRouter);
+app.use("/api/login", loginRouter);
 
 app.use(errorHandler);
 
