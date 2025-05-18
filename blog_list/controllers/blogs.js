@@ -49,6 +49,16 @@ async function updateBlogById(req, res) {
     const { id } = req.params;
     const body = req.body;
 
+    const user = req.user;
+
+    const userContainsBlogId = user.blogs.includes(id);
+
+    if (!userContainsBlogId) {
+        return res
+            .status(403)
+            .json({ error: "you are not authorized to edit this blog" });
+    }
+
     const blog = await Blog.findById(id);
 
     if (!blog) {
