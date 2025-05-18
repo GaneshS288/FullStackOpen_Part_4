@@ -22,13 +22,15 @@ describe("Viewing blogs", () => {
             name: testUser.name,
         });
         user = await user.save();
+        const testBlogDataWithUserId = testBlogsData.map((blog) => {
+            let blogWithUserId = {...blog, user: user._id}
+            return blogWithUserId;
+        })
 
-        for (let blog of testBlogsData) {
-            let newBlog = new Blog({ ...blog, user: user._id });
-            let savedBlog = await newBlog.save();
-
-            user.blogs = user.blogs.concat(savedBlog._id);
-        }
+        const savedBlogs = await Blog.insertMany(testBlogDataWithUserId);
+        
+        const savedBlogIds = savedBlogs.map((blog) => blog._id);
+        user.blogs = user.blogs.concat(savedBlogIds);
 
         await user.save();
     });
@@ -81,13 +83,15 @@ describe("Adding a blog", () => {
             name: testUser.name,
         });
         user = await user.save();
+        const testBlogDataWithUserId = testBlogsData.map((blog) => {
+            let blogWithUserId = {...blog, user: user._id}
+            return blogWithUserId;
+        })
 
-        for (let blog of testBlogsData) {
-            let newBlog = new Blog({ ...blog, user: user._id });
-            let savedBlog = await newBlog.save();
-
-            user.blogs = user.blogs.concat(savedBlog._id);
-        }
+        const savedBlogs = await Blog.insertMany(testBlogDataWithUserId);
+        
+        const savedBlogIds = savedBlogs.map((blog) => blog._id);
+        user.blogs = user.blogs.concat(savedBlogIds);
 
         await user.save();
     });
@@ -127,6 +131,17 @@ describe("Adding a blog", () => {
 
         deepStrictEqual(uploadedBlog, dummyBlog);
     });
+
+    test("returns 401 status if authorization header is missing", async () => {
+        const dummyBlog = {
+            title: "This is a test blog",
+            author: "Ganesh",
+            url: "http://notARealURL.com",
+            likes: 12,
+        };
+
+        await api.post("/api/blogs").expect(401);
+    })
 
     test("if like property is missing in post request it defaults to 0", async () => {
         const dummyBlog = {
@@ -195,13 +210,15 @@ describe("Deleting a blog", () => {
             name: testUser.name,
         });
         user = await user.save();
+        const testBlogDataWithUserId = testBlogsData.map((blog) => {
+            let blogWithUserId = {...blog, user: user._id}
+            return blogWithUserId;
+        })
 
-        for (let blog of testBlogsData) {
-            let newBlog = new Blog({ ...blog, user: user._id });
-            let savedBlog = await newBlog.save();
-
-            user.blogs = user.blogs.concat(savedBlog._id);
-        }
+        const savedBlogs = await Blog.insertMany(testBlogDataWithUserId);
+        
+        const savedBlogIds = savedBlogs.map((blog) => blog._id);
+        user.blogs = user.blogs.concat(savedBlogIds);
 
         await user.save();
     });
@@ -266,13 +283,15 @@ describe("Updating a blog", () => {
             name: testUser.name,
         });
         user = await user.save();
+        const testBlogDataWithUserId = testBlogsData.map((blog) => {
+            let blogWithUserId = {...blog, user: user._id}
+            return blogWithUserId;
+        })
 
-        for (let blog of testBlogsData) {
-            let newBlog = new Blog({ ...blog, user: user._id });
-            let savedBlog = await newBlog.save();
-
-            user.blogs = user.blogs.concat(savedBlog._id);
-        }
+        const savedBlogs = await Blog.insertMany(testBlogDataWithUserId);
+        
+        const savedBlogIds = savedBlogs.map((blog) => blog._id);
+        user.blogs = user.blogs.concat(savedBlogIds);
 
         await user.save();
     });
