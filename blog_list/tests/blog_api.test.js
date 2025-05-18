@@ -1,22 +1,48 @@
 import { describe, beforeEach, test, after } from "node:test";
 import { strictEqual, deepStrictEqual } from "node:assert";
+import bcrypt from "bcryptjs";
 import supertest from "supertest";
 import app from "../app.js";
 import Blog, { mongoose } from "../models/blog.js";
 import User from "../models/user.js";
-import { testBlogsData } from "./testHelper.js";
+import { testBlogsData, testUser } from "./testHelper.js";
 
 const api = supertest(app);
 
 describe("Viewing blogs", () => {
     beforeEach(async () => {
         await Blog.deleteMany({});
-        await Blog.insertMany(testBlogsData);
+        await User.deleteMany({});
+
+        const passwordHash = await bcrypt.hash(testUser.password, 10);
+
+        let user = new User({
+            username: testUser.username,
+            passwordHash: passwordHash,
+            name: testUser.name,
+        });
+        user = await user.save();
+
+        for (let blog of testBlogsData) {
+            let newBlog = new Blog({ ...blog, user: user._id });
+            let savedBlog = await newBlog.save();
+
+            user.blogs = user.blogs.concat(savedBlog._id);
+        }
+
+        await user.save();
     });
 
     test("retruns the correct number of blogs", async () => {
+        const loginRes = await api
+            .post("/api/login")
+            .send({ username: testUser.username, password: testUser.password });
+
+        const token = loginRes.body.token;
+
         const res = await api
             .get("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .expect(200)
             .expect("Content-Type", /application\/json/);
 
@@ -24,8 +50,15 @@ describe("Viewing blogs", () => {
     });
 
     test("returned blogs have id property", async () => {
+        const loginRes = await api
+            .post("/api/login")
+            .send({ username: testUser.username, password: testUser.password });
+
+        const token = loginRes.body.token;
+
         const { body } = await api
             .get("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .expect(200)
             .expect("Content-Type", /application\/json/);
 
@@ -261,8 +294,8 @@ describe("Creating users", () => {
             .expect(400)
             .expect("Content-Type", /application\/json/);
 
-            strictEqual(res.body.error, "expected `username` to be unique")
-    })
+        strictEqual(res.body.error, "expected `username` to be unique");
+    });
 });
 
 after(async () => {

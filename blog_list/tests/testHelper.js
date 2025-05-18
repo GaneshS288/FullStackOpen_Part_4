@@ -37,5 +37,10 @@ const testBlogsData = [
     },
 ];
 
+const testUser = {
+    username: "Root",
+    name: "Root User",
+    password: "password",
+};
 
-export { testBlogsData };
+export { testBlogsData, testUser };
