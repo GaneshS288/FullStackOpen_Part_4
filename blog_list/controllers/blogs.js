@@ -9,11 +9,12 @@ async function getAllBlogs(req, res) {
 }
 
 async function postNewBlog(req, res) {
-    const user = await User.find({});
-    const newBlog = new Blog({...req.body, user: user[0]._id});
+    const user = req.user;
+
+    const newBlog = new Blog({...req.body, user: user._id});
     const saveResult = await newBlog.save();
-    user[0].blogs = user[0].blogs.concat(saveResult._id)
-    await user[0].save();
+    user.blogs = user.blogs.concat(saveResult._id)
+    await user.save();
 
     res.status(201).json(saveResult.toJSON());
 }
