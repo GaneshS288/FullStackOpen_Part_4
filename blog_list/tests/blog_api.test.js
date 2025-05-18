@@ -71,7 +71,25 @@ describe("Viewing blogs", () => {
 describe("Adding a blog", () => {
     beforeEach(async () => {
         await Blog.deleteMany({});
-        await Blog.insertMany(testBlogsData);
+        await User.deleteMany({});
+
+        const passwordHash = await bcrypt.hash(testUser.password, 10);
+
+        let user = new User({
+            username: testUser.username,
+            passwordHash: passwordHash,
+            name: testUser.name,
+        });
+        user = await user.save();
+
+        for (let blog of testBlogsData) {
+            let newBlog = new Blog({ ...blog, user: user._id });
+            let savedBlog = await newBlog.save();
+
+            user.blogs = user.blogs.concat(savedBlog._id);
+        }
+
+        await user.save();
     });
 
     test("successfully adds blog", async () => {
@@ -82,14 +100,22 @@ describe("Adding a blog", () => {
             likes: 12,
         };
 
+        const loginRes = await api
+            .post("/api/login")
+            .send({ username: testUser.username, password: testUser.password });
+
+        const token = loginRes.body.token;
+
         await api
             .post("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .send(dummyBlog)
             .expect(201)
             .expect("Content-Type", /application\/json/);
 
         const { body } = await api
             .get("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .expect(200)
             .expect("Content-Type", /application\/json/);
 
@@ -97,6 +123,7 @@ describe("Adding a blog", () => {
             (blog) => blog.title === dummyBlog.title
         );
         delete uploadedBlog.id;
+        delete uploadedBlog.user;
 
         deepStrictEqual(uploadedBlog, dummyBlog);
     });
@@ -108,14 +135,22 @@ describe("Adding a blog", () => {
             url: "http://notARealURL.com",
         };
 
+        const loginRes = await api
+            .post("/api/login")
+            .send({ username: testUser.username, password: testUser.password });
+
+        const token = loginRes.body.token;
+
         await api
             .post("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .send(dummyBlog)
             .expect(201)
             .expect("Content-Type", /application\/json/);
 
         const { body } = await api
             .get("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .expect(200)
             .expect("Content-Type", /application\/json/);
 
@@ -132,8 +167,15 @@ describe("Adding a blog", () => {
             author: "Ganesh",
         };
 
+        const loginRes = await api
+            .post("/api/login")
+            .send({ username: testUser.username, password: testUser.password });
+
+        const token = loginRes.body.token;
+
         await api
             .post("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .send(dummyBlog)
             .expect(400)
             .expect("Content-Type", /application\/json/);
@@ -143,21 +185,50 @@ describe("Adding a blog", () => {
 describe("Deleting a blog", () => {
     beforeEach(async () => {
         await Blog.deleteMany({});
-        await Blog.insertMany(testBlogsData);
+        await User.deleteMany({});
+
+        const passwordHash = await bcrypt.hash(testUser.password, 10);
+
+        let user = new User({
+            username: testUser.username,
+            passwordHash: passwordHash,
+            name: testUser.name,
+        });
+        user = await user.save();
+
+        for (let blog of testBlogsData) {
+            let newBlog = new Blog({ ...blog, user: user._id });
+            let savedBlog = await newBlog.save();
+
+            user.blogs = user.blogs.concat(savedBlog._id);
+        }
+
+        await user.save();
     });
 
     test("returns 204 status on successfull deletion and deletes blog", async () => {
+        const loginRes = await api
+            .post("/api/login")
+            .send({ username: testUser.username, password: testUser.password });
+
+        const token = loginRes.body.token;
+
         const responseBeforeDelete = await api
             .get("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .expect(200)
             .expect("Content-Type", /application\/json/);
 
         const blogId = responseBeforeDelete.body[0].id;
 
-        await api.delete(`/api/blogs/${blogId}`).expect(204);
+        await api
+            .delete(`/api/blogs/${blogId}`)
+            .set({ authorization: `Bearer ${token}` })
+            .expect(204);
 
         const responseAfterDelete = await api
             .get("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .expect(200)
             .expect("Content-Type", /application\/json/);
 
@@ -168,20 +239,54 @@ describe("Deleting a blog", () => {
     });
 
     test("returns 404 status when the blog with id doesn't exist", async () => {
+        const loginRes = await api
+            .post("/api/login")
+            .send({ username: testUser.username, password: testUser.password });
+
+        const token = loginRes.body.token;
+
         const blogId = "68244dc6c0d680d3c9815448";
-        await api.delete(`/api/blogs/${blogId}`).expect(404);
+        await api
+            .delete(`/api/blogs/${blogId}`)
+            .set({ authorization: `Bearer ${token}` })
+            .expect(404);
     });
 });
 
 describe("Updating a blog", () => {
     beforeEach(async () => {
         await Blog.deleteMany({});
-        await Blog.insertMany(testBlogsData);
+        await User.deleteMany({});
+
+        const passwordHash = await bcrypt.hash(testUser.password, 10);
+
+        let user = new User({
+            username: testUser.username,
+            passwordHash: passwordHash,
+            name: testUser.name,
+        });
+        user = await user.save();
+
+        for (let blog of testBlogsData) {
+            let newBlog = new Blog({ ...blog, user: user._id });
+            let savedBlog = await newBlog.save();
+
+            user.blogs = user.blogs.concat(savedBlog._id);
+        }
+
+        await user.save();
     });
 
     test("sucessfully updates a blog", async () => {
+        const loginRes = await api
+            .post("/api/login")
+            .send({ username: testUser.username, password: testUser.password });
+
+        const token = loginRes.body.token;
+
         const responseBeforeUpdate = await api
             .get("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .expect(200)
             .expect("Content-Type", /application\/json/);
 
@@ -196,15 +301,23 @@ describe("Updating a blog", () => {
 
         const { body: updatedBlog } = await api
             .put(`/api/blogs/${blogId}`)
+            .set({ authorization: `Bearer ${token}` })
             .send(updateData)
             .expect(200);
         delete updatedBlog.id;
+        delete updatedBlog.user;
 
         deepStrictEqual(updatedBlog, updateData);
     });
 
     test("retruns 404 if blog with id doesn't exist", async () => {
         const blogId = "68244dc6c0d680d3c9815448";
+
+        const loginRes = await api
+            .post("/api/login")
+            .send({ username: testUser.username, password: testUser.password });
+
+        const token = loginRes.body.token;
 
         const updateData = {
             title: "how to test software",
@@ -213,12 +326,23 @@ describe("Updating a blog", () => {
             likes: 20,
         };
 
-        await api.put(`/api/blogs/${blogId}`).send(updateData).expect(404);
+        await api
+            .put(`/api/blogs/${blogId}`)
+            .set({ authorization: `Bearer ${token}` })
+            .send(updateData)
+            .expect(404);
     });
 
     test("returns 400 if a field is missing in request body", async () => {
+        const loginRes = await api
+            .post("/api/login")
+            .send({ username: testUser.username, password: testUser.password });
+
+        const token = loginRes.body.token;
+
         const responseBeforeUpdate = await api
             .get("/api/blogs")
+            .set({ authorization: `Bearer ${token}` })
             .expect(200)
             .expect("Content-Type", /application\/json/);
 
@@ -229,7 +353,11 @@ describe("Updating a blog", () => {
             author: "ganesh",
         };
 
-        await api.put(`/api/blogs/${blogId}`).send(updateData).expect(400);
+        await api
+            .put(`/api/blogs/${blogId}`)
+            .set({ authorization: `Bearer ${token}` })
+            .send(updateData)
+            .expect(400);
     });
 });
 

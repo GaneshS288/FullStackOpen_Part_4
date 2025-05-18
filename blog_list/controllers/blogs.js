@@ -30,16 +30,14 @@ async function deleteBlogById(req, res) {
 
     const userContainsBlogId = user.blogs.includes(id);
 
-    if (!userContainsBlogId) {
-        return res
-            .status(403)
-            .json({ error: "you are not authorized to delete this blog" });
-    }
-
     const deletedBlog = await Blog.findByIdAndDelete(id);
 
     if (!deletedBlog) {
         return res.status(404).json({ error: "no such entry" });
+    } else if (!userContainsBlogId) {
+        return res
+            .status(403)
+            .json({ error: "you are not authorized to delete this blog" });
     } else {
         return res.status(204).end();
     }
@@ -53,16 +51,14 @@ async function updateBlogById(req, res) {
 
     const userContainsBlogId = user.blogs.includes(id);
 
-    if (!userContainsBlogId) {
-        return res
-            .status(403)
-            .json({ error: "you are not authorized to edit this blog" });
-    }
-
     const blog = await Blog.findById(id);
 
     if (!blog) {
-        res.status(404).json({ error: "this entry doesn't exist" });
+        return res.status(404).json({ error: "this entry doesn't exist" });
+    } else if (!userContainsBlogId) {
+        return res
+            .status(403)
+            .json({ error: "you are not authorized to edit this blog" });
     } else {
         blog.title = body.title;
         blog.author = body.author;
@@ -71,7 +67,7 @@ async function updateBlogById(req, res) {
 
         const updatedBlog = await blog.save();
 
-        res.json(updatedBlog);
+        return res.json(updatedBlog);
     }
 }
 
